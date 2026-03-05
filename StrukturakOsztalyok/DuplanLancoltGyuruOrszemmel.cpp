@@ -23,12 +23,12 @@ class Lista{
     Node *s; ///sentinel
 
 public:
-
     Lista(){
         s = new Node();
         s->next = s;
         s->prev = s;
     }
+    //masolo konstruktor
     Lista(const Lista &lista)
     {
         s = new Node();
@@ -39,6 +39,7 @@ public:
             beszur_hatul(i->adat);
         }
     }
+    //kiuriti a listat
     void clear(){
         Node *p = s->next;
         while(p != s){
@@ -50,6 +51,7 @@ public:
         s->next = s;
         s->prev = s;
     }
+    //destruktor
     ~Lista(){
         clear();
         delete s;
@@ -111,8 +113,39 @@ public:
             }
         }
     }
+    static Lista osszefesul(Lista &a, Lista &b)
+    {
+        Lista c;
+        Node *i = a.s -> next;
+        Node *j = b.s -> next;
+        while(i != a.s && j != b.s){
+            if(i->adat <= j->adat)
+            {
+                c.beszur_hatul(i->adat);
+                i = i->next;
+            }
+            else
+            {
+                c.beszur_hatul(j->adat);
+                j = j->next;
+            }
+        }
+        while(i != a.s)
+        {
+            c.beszur_hatul(i->adat);
+            i = i->next;
+        }
+        while(j != b.s)
+        {
+            c.beszur_hatul(j->adat);
+            j = j->next;
+        }
+        return c;
+    }
+    //= operator tulterhelese
     Lista& operator=(const Lista& other)
     {
+        //kivedem azt amikor onmagat kene bemasolni
         if(this != &other)
         {
             clear();
@@ -128,17 +161,24 @@ public:
 int main()
 {
     int n = 20;
-    Lista a, b;
+    Lista a, b, d;
     srand(time(0));
     for(int i=0; i<n; i++)
     {
         a.rendezett_beszur(rand()%100);
-        b.beszur_hatul(rand()%3);
+        b.rendezett_beszur(rand()%100);
+        d.beszur_hatul(rand()%3);
     }
     cout << "a:" << endl;
     a.kiir();
-    a.torol(0);
     cout << "b:" << endl;
-    a.kiir();
+    b.kiir();
+    cout<< "osszefesulve: "<< endl;
+    Lista c = Lista::osszefesul(a, b);
+    c.kiir();
+    cout << "d:" << endl;
+    d.kiir();
+    d.torol(0);
+    d.kiir();
     return 0;
 }
