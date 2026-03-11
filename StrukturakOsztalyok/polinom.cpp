@@ -6,9 +6,13 @@ using namespace std;
 
 class Polinom
 {
-    float egyutthato[100];
+    float egyutthato[100] = {0};
     int n;
 public:
+    Polinom()
+    {
+        this->n = 0;
+    }
     Polinom(float egyutthato[], int n)
     {
         for(int i = 0; i <= n; i++)
@@ -17,34 +21,46 @@ public:
         }
         this->n = n;
     }
-    Polinom()
+    Polinom operator+(const Polinom &x) const
     {
-        this->n = 0;
-    }
-    Polinom operator+(const Polinom &x)
-    {
+        const Polinom &kisebb = this->n < x.n ? *this : x;
+        const Polinom &nagyobb = this->n >= x.n ? *this : x;
+
         Polinom osszeg;
-        if(this->n > x.n)
+        osszeg.n = nagyobb.n;
+        for(int i = 0; i <= nagyobb.n; i++)
         {
-            osszeg.n = this->n;
-            for(int i = 0; i <= this->n; i++)
-            {
-               osszeg.egyutthato[i] = this->egyutthato[i];
-               if(i <= x.n)
-                osszeg.egyutthato[i] += x.egyutthato[i];
-            }
-        }
-        else
-        {
-            osszeg.n = x.n;
-            for(int i = 0; i <= x.n; i++)
-            {
-               osszeg.egyutthato[i] = x.egyutthato[i];
-               if(i <= this->n)
-                osszeg.egyutthato[i] += this->egyutthato[i];
-            }
+            osszeg.egyutthato[i] = nagyobb.egyutthato[i];
+            if(i <= kisebb.n)
+                osszeg.egyutthato[i] += kisebb.egyutthato[i];
         }
         return osszeg;
+    }
+    Polinom operator-(const Polinom &x) const
+    {
+        return *this + (x * -1);
+    }
+    Polinom operator*(const float &s) const
+    {
+        Polinom szorzat;
+        szorzat.n = n;
+        for(int i = 0; i <= n; i++){
+            szorzat.egyutthato[i] = egyutthato[i] * s;
+        }
+        return szorzat;
+    }
+    Polinom operator*(const Polinom &x) const
+    {
+        Polinom szorzat;
+        szorzat.n = n + x.n;
+        for(int i = 0; i <= n; i++)
+        {
+            for(int j = 0; j <= x.n; j++)
+            {
+                 szorzat.egyutthato[i + j] += egyutthato[i] * x.egyutthato[j];
+            }
+        }
+        return szorzat;
     }
     friend ostream& operator<<(ostream &out, const Polinom &x);
 };
@@ -56,22 +72,48 @@ ostream& operator<<(ostream &out, const Polinom &x)
     {
         if(x.egyutthato[i] != 0)
         {
+            float a = x.egyutthato[i];
+
             if(irtunkMar)
-                cout << " + ";
+            {
+                if(a > 0)
+                    out << " + ";
+                else
+                    out << " - ";
+            }
+            else
+            {
+                if(a < 0)
+                    out << "-";
+            }
 
             irtunkMar = true;
 
+            float b = abs(a);
+
             if(i == 0)
-                out<<x.egyutthato[i];
+                out << b;
             else if(i == 1)
-                out<<x.egyutthato[i]<<"x";
+            {
+                if(b == 1)
+                    out << "x";
+                else
+                    out << b << "x";
+            }
             else
-                out<<x.egyutthato[i]<<"x^"<<i;
+            {
+                if(b == 1)
+                    out << "x^" << i;
+                else
+                    out << b << "x^" << i;
+            }
         }
     }
+    //minden egyutthato 0
+    if(!irtunkMar)
+        out << 0;
     return out;
 }
-
 int main()
 {
     srand(time(0));
@@ -79,16 +121,18 @@ int main()
     float tomb2[10];
     for(int i = 0; i <= 5; i++)
     {
-        tomb[i] = rand()%10;
+        tomb[i] = rand() % 20 - 10;
     }
     for(int i = 0; i <= 7; i++)
     {
-        tomb2[i] = rand()%10;
+        tomb2[i] = rand() % 20 - 10;
     }
     Polinom a(tomb, 5);
     Polinom b(tomb2, 7);
-    cout << a << endl;
-    cout << b << endl;
-    cout << a + b << endl;
+    cout << "a: " << endl << a << endl;
+    cout << "b: " << endl << b << endl;
+    cout << "a + b: " << endl << a + b << endl;
+    cout << "a - b: " << endl << a - b << endl;
+    cout << "a * b: " << endl << a * b << endl;
     return 0;
 }
