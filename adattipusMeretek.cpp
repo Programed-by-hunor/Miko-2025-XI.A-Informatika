@@ -17,6 +17,24 @@ struct valami{
     char c;    // 1 byte
 };
 
+/*
+0   c
+1   padding
+2   padding
+3   padding
+4   x
+8   x2
+12  y
+14  padding
+15  padding
+*/
+struct valami2{
+    char c;    // 1 byte
+    int x;     // 4 byte
+    int x2;    // 4 byte
+    short y;   // 2 byte
+};
+
 //gyors egesz kitevoju hatvanyozas
 long long hatvany(long long alap, int kitevo){
     long long eredmeny = 1;
@@ -78,10 +96,12 @@ int main(){
     cout << "pointer bool " << sizeof(pbool) << " byte" << endl;
 
     valami v;
+    valami2 v2;
     valami *pvstruct = &v;
     valami &rstruct = v;
 
     cout << "struct " << sizeof(v) << " byte" << endl;
+    cout << "struct bad order " << sizeof(v2) << " byte" << endl;
     cout << "pointer struct " << sizeof(pvstruct) << " byte" << endl;
     cout << "reference struct " << sizeof(rstruct) << " byte" << endl;
     cout << "pointer struct erteke " << pvstruct << endl;
