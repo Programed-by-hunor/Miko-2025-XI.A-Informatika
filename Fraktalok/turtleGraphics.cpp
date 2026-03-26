@@ -1,17 +1,20 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <string>
+#include <vector>
 
 using namespace sf;
 
-const float pi = 3.141592;
-
 class Turtle
 {
+    const float pi = 3.141592;
     VertexArray lines;  //array of line segments
     Vector2f pos;       //position
     Vector2f dir;       //direction
     float angle;        //turn angle in degrees
     float ratio;        //segment length change ratio
+    Color color;
+    char commands[10000];
 
     //rotate around origo
     Vector2f rotate(Vector2f a, float angle)
@@ -22,13 +25,44 @@ class Turtle
                         a.x * sin(rad) + a.y * cos(rad)
                     );
     }
+    void stringCopy(char source[],char dest[])
+    {
+        //while(*dest++==*source++);
+
+        while(*source!=0)
+        {
+            //*dest++=*source++;
+
+            *dest=*source;
+            dest++;
+            source++;
+        }
+        *dest = 0;
+    }
+
+    void stringConcatenate(char source[], char dest[])
+    {
+        while(*dest!=0)
+        {
+            dest++;
+        }
+
+        while(*source!=0)
+        {
+            *dest=*source;
+            dest++;
+            source++;
+        }
+    }
 public:
-    Turtle(Vector2f startPos =  Vector2f(0, 0), Vector2f dir = Vector2f(50, 0), float angle = 30, float ratio = 2) : lines(Lines)
+    Turtle(Vector2f startPos =  Vector2f(0, 0), Vector2f dir = Vector2f(50, 0), float angle = 30, float ratio = 2, Color color = Color::Red, char * s = 0) : lines(Lines)
     {
         this->pos = startPos;
         this->dir = dir;
         this->angle = angle;
         this->ratio = ratio;
+        this->color = color;
+        commands[0] = 0;
     }
     void move()
     {
@@ -36,9 +70,9 @@ public:
     }
     void draw()
     {
-        lines.append(Vertex(pos, Color::Red));
+        lines.append(Vertex(pos, color));
         move();
-        lines.append(Vertex(pos, Color::Red));
+        lines.append(Vertex(pos, color));
     }
     void turnR()
     {
@@ -48,6 +82,7 @@ public:
     {
         dir = rotate(dir, -angle);
     }
+    //rotate by 180 degrees
     void flip()
     {
         dir.x *= -1;
@@ -64,6 +99,29 @@ public:
     void print(RenderWindow &window)
     {
         window.draw(lines);
+    }
+    void setCommand(char *s)
+    {
+        stringCopy(s, commands);
+    }
+    void processCommands()
+    {
+        lines.clear();
+        for (char *c = commands; *c; c++)
+        {
+            switch(*c)
+            {
+                case 'F': draw(); break;
+                case 'G': draw(); break;
+                case 'D': draw(); break;
+                case 'M': move(); break;
+                case '+': turnR(); break;
+                case '-': turnL(); break;
+                case '>': increase(); break;
+                case '<': decrease(); break;
+                case '|': flip(); break;
+            }
+        }
     }
 };
 
@@ -103,6 +161,13 @@ int main()
     h.turnL();
     h.draw();
 
+    Turtle b(Vector2f(100.f, 100.f), Vector2f(40.f, 0.f), 72, 1);
+    for(int i=0;i<5;i++)
+    {
+        b.draw();
+        b.turnR();
+    }
+
     //csillag
     Turtle s5(Vector2f(500.f, 300.f), Vector2f(80.f, 0.f), 144, 1);
 
@@ -112,13 +177,19 @@ int main()
         s5.turnR();
     }
 
-    Turtle s(Vector2f(600.f, 200.f), Vector2f(80.f, 0.f), 144, 1.05);
+    //spiral csillag
+    Turtle s(Vector2f(400.f, 200.f), Vector2f(80.f, 0.f), 144, 1.05);
     for (int i = 0; i < 20; i++)
     {
         s.draw();
         s.turnR();
         s.increase();
     }
+
+    Turtle a(Vector2f(200.f, 100.f), Vector2f(100.f, 0.f), 90, 1.1, Color::Green);
+    a.setCommand("D+D+D+D");
+    a.processCommands();
+
 
     while (window.isOpen())
     {
@@ -137,6 +208,8 @@ int main()
         h.print(window);
         s5.print(window);
         s.print(window);
+        b.print(window);
+        a.print(window);
 
         window.display();
     }
