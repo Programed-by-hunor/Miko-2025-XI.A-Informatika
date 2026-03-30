@@ -13,6 +13,14 @@ struct Rule
     char rule[100];
 };
 
+struct TurtleState{
+    Vector2f pos;       //position
+    Vector2f dir;       //direction
+    float angle;        //turn angle in degrees
+    float ratio;        //segment length change ratio
+    Color color;
+};
+
 class Turtle
 {
     VertexArray lines;  //array of line segments
@@ -24,6 +32,8 @@ class Turtle
     char commands[stringSize];
     Rule rules[10];
     int ruleCount;
+    TurtleState stateStack[1000];
+    int stackSize;
 
     //rotate around origo
     Vector2f rotate(Vector2f a, float angle)
@@ -62,6 +72,30 @@ class Turtle
             source++;
         }
         *dest = 0;
+    }
+
+    void push(){
+        stackSize++;
+        TurtleState tmp;
+        tmp.angle = angle;
+        tmp.color=color;
+        tmp.dir=dir;
+        tmp.pos=pos;
+        tmp.ratio=ratio;
+        stateStack[stackSize]=tmp;
+    }
+
+    void pop(){
+        if(stackSize <0)
+            return;
+
+        TurtleState tmp =stateStack[stackSize];
+        angle = tmp.angle;
+        color= tmp.color;
+        dir= tmp.dir;
+        pos= tmp.pos;
+        ratio= tmp.ratio;
+        stackSize--;
     }
 
 public:
@@ -143,6 +177,8 @@ public:
                 case '>': increase(); break;
                 case '<': decrease(); break;
                 case '|': flip(); break;
+                case '[': push(); break;
+                case ']': pop(); break;
             }
         }
     }
@@ -188,16 +224,22 @@ int main()
     RenderWindow window(VideoMode(windowWidth, windowHeight), "Lindenmayer system");
     window.setFramerateLimit(60);
 
-    Turtle koch(Vector2f(300.f,300.f), Vector2f(3.f, 0.f), 90, 1, Color::White);
+    Turtle koch(Vector2f(100.f,400.f), Vector2f(3.f, 0.f), 90, 1, Color::White);
     koch.setCommand("F");
     koch.addRule('F', "F+F-F-F+F");
     koch.applyRules(4);
 
-    Turtle sierpinski(Vector2f(200.f,200.f), Vector2f(10.f, 0.f), 120, 1, Color::Red);
+    Turtle sierpinski(Vector2f(500.f,500.f), Vector2f(10.f, 0.f), 120, 1, Color::Red);
     sierpinski.setCommand("F-G-G");
     sierpinski.addRule('F', "F-G+F+G-F");
     sierpinski.addRule('G', "GG");
     sierpinski.applyRules(4);
+
+    Turtle tree(Vector2f(400.f,600.f), Vector2f(0.f, -2.f), 50, 1, Color::Green);
+    tree.setCommand("F");
+    tree.addRule('F', "G[-F][+F]");
+    tree.addRule('G', "GG");
+    tree.applyRules(8);
 
     while (window.isOpen())
     {
@@ -207,14 +249,28 @@ int main()
             if (event.type == Event::Closed)
                 window.close();
             if (event.type == Event::KeyPressed)
-                //if (event.key.code == Keyboard::Escape)
-                window.close();
+            {
+                if(event.key.code == Keyboard::Escape)
+                    window.close();
+
+                // Press a key to save screenshot
+                if(event.key.code == Keyboard::S)
+                {
+                    Texture texture;
+                    texture.create(window.getSize().x, window.getSize().y);
+                    texture.update(window); // copy window contents
+
+                    Image screenshot = texture.copyToImage();
+                    screenshot.saveToFile("screenshot.png");
+                }
+            }
         }
 
         window.clear(Color::Black);
 
         sierpinski.print(window);
         koch.print(window);
+        tree.print(window);
 
         window.display();
     }
