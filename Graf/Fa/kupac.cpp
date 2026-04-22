@@ -4,6 +4,7 @@
 
 using namespace std;
 
+
 int kupac[100];
 int n = 0;
 
