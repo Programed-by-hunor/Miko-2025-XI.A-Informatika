@@ -11,7 +11,7 @@ TURN_SPEED = 25
 TURN_ANGLE = 90
 
 # --- MOZGÁS ---
-def move_forward(cm):
+async def move_forward(cm):
     motor_pair.move_for_degrees(
         motor_pair.PAIR_1,
         cm * 360,# közelítés: 360° ≈ 1 kerékfordulat
@@ -19,7 +19,7 @@ def move_forward(cm):
         velocity=300
     )
 
-def draw_forward(cm):
+async def draw_forward(cm):
     # itt lehetne filc le/fel
     motor_pair.move_for_degrees(
         motor_pair.PAIR_1,
@@ -29,7 +29,7 @@ def draw_forward(cm):
     )
 
 # --- GIROSKÓPOS FORDULÁS ---
-def turn(angle):
+async def turn(angle):
     motion_sensor.reset_yaw(0)
 
     if angle > 0:   #jobbra
@@ -44,7 +44,7 @@ def turn(angle):
     motor_pair.stop(motor_pair.PAIR_1)
 
 # --- INTERPRETER ---
-def execute(commands):
+async def execute(commands):
     step = STEP_CM
 
     for c in commands:
@@ -66,6 +66,6 @@ def execute(commands):
 
 # --- FŐ PROGRAM ---
 async def main():
-    execute("D+D+D+D")
+    await execute("D+D+D+D")
 
 runloop.run(main())
